@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دردشة الغرفة</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      background-color: #f0f0f0;
+      height: 100vh;
+    }
+    h1 {
+      color: #007bff;
+    }
+    .chat-box {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      height: 70vh;
+      overflow-y: auto;
+    }
+    input {
+      width: 80%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
+
+  <!-- إضافة Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+    // إعداد Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnHSUo_Vu53NidFWYlQ74_CyOyfVW_BqQ",
+      authDomain: "alaah-8d503.firebaseapp.com",
+      databaseURL: "https://alaah-8d503-default-rtdb.firebaseio.com",
+      projectId: "alaah-8d503",
+      storageBucket: "alaah-8d503.firebasestorage.app",
+      messagingSenderId: "365922482892",
+      appId: "1:365922482892:web:a843fbb3594d200c67e069",
+      measurementId: "G-D4TPJW4RT8"
+    };
+
+    // تهيئة Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // قراءة بيانات الغرفة من sessionStorage
+    const roomName = sessionStorage.getItem("roomName") || "غرفة افتراضية";
+    document.getElementById("roomTitle").textContent = roomName;
+
+    // مرجع قاعدة البيانات للغرفة
+    const roomRef = ref(db, 'rooms/' + roomName);
+
+    // إرسال رسالة إلى الغرفة
+    document.getElementById('sendMessageBtn').addEventListener('click', function() {
+      const message = document.getElementById('message').value.trim();
+      if (message) {
+        const newMessage = {
+          text: message,
+          timestamp: Date.now()
+        };
+        push(roomRef, newMessage); // حفظ الرسالة في الغرفة
+        document.getElementById('message').value = ''; // مسح مربع النص
+      }
+    });
+
+    // الاستماع إلى الرسائل الجديدة في الغرفة
+    onChildAdded(roomRef, function(snapshot) {
+      const message = snapshot.val();
+      const chatBox = document.getElementById('chatBox');
+      const newMessageElement = document.createElement('p');
+      newMessageElement.textContent = message.text;
+      chatBox.appendChild(newMessageElement);
+
+      // التمرير التلقائي لأسفل
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+  </script>
+</head>
+<body>
+  <h1>غرفة دردشة: <span id="roomTitle"></span></h1>
+  <div class="chat-box" id="chatBox">
+    <p>أهلاً بك في غرفة الدردشة!</p>
+  </div>
+  <input type="text" id="message" placeholder="اكتب رسالتك هنا"> 
+  <button id="sendMessageBtn">إرسال</button>
+
+</body></html>
